@@ -10,7 +10,8 @@ PROJECTS = [
         "id": "1",
         "imageUrl": "https://files-cdn.live/assets/1780666790493-76f62a33.png",
         "title": "Billions Network (BILL) | Earn your share of 10,000,000 $BILL in rewards",
-        "description": "Billions Network is the first Human and AI network, built on mobile-first, privacy-preserving technology to scale trust in the age of AI. Add USDT to earn your share of rewards, with a market value of 10,000,000 $BILL as of May 15, 2026.",
+        "description": "Billions Network is the first Human and AI network, built on mobile-first, privacy-preserving technology to scale trust in the age of AI. Add USDT to earn your share of rewards, with a market value of 10,000,000 $BILL as of ",
+        "asOf": "May 15, 2026",
         "rewardCurrency": "BILL",
         "totalRewards": "10,000,000",
         "tokenPrice": "0.01$",
@@ -28,7 +29,8 @@ PROJECTS = [
         "id": "2",
         "imageUrl": "https://files-cdn.live/assets/1780664933440-93c785cb.png",
         "title": "LayerZero (ZRO) | Earn your share of 5,000,000 $ZRO in rewards",
-        "description": "LayerZero builds technology that makes decentralization viable, scalable, and inevitable. Add USDT to earn your share of rewards, with a market value of 5,000,000 $ZRO as of May 14, 2026.",
+        "description": "LayerZero builds technology that makes decentralization viable, scalable, and inevitable. Add USDT to earn your share of rewards, with a market value of 5,000,000 $ZRO as of ",
+        "asOf": "May 14, 2026",
         "rewardCurrency": "ZRO",
         "totalRewards": "5,000,000",
         "durationDays": "10",
@@ -45,7 +47,8 @@ PROJECTS = [
         "id": "3",
         "imageUrl": "https://files-cdn.live/assets/1780665920823-df81d5ff.png",
         "title": "Kite Ai (KITE) | Earn your share of 10,000,000 $KITE in rewards",
-        "description": "Kite Ai provides autonomous agents with verifiable trust and a purpose-built chain to transact, coordinate, and operate at scale. Add USDT to earn your share of rewards, with a market value of 10,000,000 $KITE as of May 14, 2026.",
+        "description": "Kite Ai provides autonomous agents with verifiable trust and a purpose-built chain to transact, coordinate, and operate at scale. Add USDT to earn your share of rewards, with a market value of 10,000,000 $KITE as of ",
+        "asOf": "May 14, 2026",
         "rewardCurrency": "KITE",
         "totalRewards": "10,000,000",
         "durationDays": "16",
@@ -62,7 +65,8 @@ PROJECTS = [
         "id": "4",
         "imageUrl": "https://files-cdn.live/assets/1780664777865-dc62bf83.png",
         "title": "Aave (AAVE) | Earn your share of 50,000 $AAVE in rewards",
-        "description": "Aave is a decentralised non-custodial liquidity protocol where users can participate as suppliers or borrowers. Add USDT to earn your share of rewards, with a market value of 50,000 $AAVE as of June 16, 2026.",
+        "description": "Aave is a decentralised non-custodial liquidity protocol where users can participate as suppliers or borrowers. Add USDT to earn your share of rewards, with a market value of 50,000 $AAVE as of ",
+        "asOf": "June 16, 2026",
         "rewardCurrency": "AAVE",
         "totalRewards": "50,000",
         "tokenPrice": "10$",
@@ -99,7 +103,7 @@ def card_table(p):
                             <td style="padding: 12px 16px; width: 16.6667%; box-sizing: border-box; text-align: left;">{p['rewardCurrency']}</td>
                             <td style="padding: 12px 16px; width: 16.6667%; box-sizing: border-box; text-align: left;" data-value="total">{p['totalRewards']}</td>
                             <td style="padding: 12px 16px; width: 16.6667%; box-sizing: border-box; text-align: left;">{p['tokenPrice']}</td>
-                            <td style="padding: 12px 16px; width: 16.6667%; box-sizing: border-box; text-align: left;">{p['durationDays']} Days</td>
+                            <td style="padding: 12px 16px; width: 16.6667%; box-sizing: border-box; text-align: left;"><span data-value="duration">{p['durationDays']}</span> Days</td>
                             <td style="padding: 12px 16px; width: 16.6667%; box-sizing: border-box; text-align: left;" data-value="end">{p['endDate']}</td>
                         </tr>
                     </tbody>
@@ -120,7 +124,7 @@ def card_table(p):
                             <td style="padding: 12px 16px; font-weight: 500; color: #0ecb81;">ACTIVE</td>
                             <td style="padding: 12px 16px;">{p['rewardCurrency']}</td>
                             <td style="padding: 12px 16px;" data-value="total">{p['totalRewards']}</td>
-                            <td style="padding: 12px 16px;">{p['durationDays']} Days</td>
+                            <td style="padding: 12px 16px;"><span data-value="duration">{p['durationDays']}</span> Days</td>
                             <td style="padding: 12px 16px;" data-value="end">{p['endDate']}</td>
                         </tr>
                     </tbody>
@@ -135,7 +139,7 @@ def card_html(p):
             </div>
             <div style="padding: 20px 24px 0 24px;">
                 <h2 style="font-size: 22px; font-weight: 600; margin: 0 0 16px 0;">{p['title']}</h2>
-                <p style="font-size: 14px; color: #5e6673; margin-bottom: 24px; line-height: 1.5;">{p['description']}</p>
+                <p style="font-size: 14px; color: #5e6673; margin-bottom: 24px; line-height: 1.5;">{p['description']}<span data-value="asof">{p['asOf']}</span>.</p>
             </div>
             <div style="padding: 0 24px;">
 {card_table(p)}

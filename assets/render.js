@@ -20,8 +20,12 @@ const end = withFallback(getParam("end"), ["endDate"], null);
 const total = withFallback(getParam("total"), ["totalRewards"], null);
 const participants = withFallback(getParam("participants"), ["totalParticipants"], null);
 const my = withFallback(getParam("my"), ["myRewards"], null);
+const duration = withFallback(getParam("duration"), ["durationDays"], null);
+const asof = withFallback(getParam("asof"), ["asOf"], null);
 
 if (end) setText("[data-value='end']", end);
 if (total) setText("[data-value='total']", total);
 if (participants) setText("[data-value='participants']", participants);
 if (my) setText("[data-value='my']", my);
+if (duration) setText("[data-value='duration']", duration);
+if (asof) setText("[data-value='asof']", asof);
