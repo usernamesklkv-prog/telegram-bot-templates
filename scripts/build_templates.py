@@ -178,12 +178,9 @@ def render_page(p, header: str, sidebar: str) -> str:
     <div class="boost-layout">
       <div class="boost-main">
 {card_html(p)}
+        <div class="boost-terms">Boost Events are subject to the <a href="https://support.binance.us/en/articles/12101402-binance-us-boost-supplemental-terms-and-conditions" target="_blank" rel="noopener noreferrer">Boost Terms of Service</a></div>
       </div>
 {sidebar}
-    </div>
-    <div class="boost-footer-links">
-      <a href="#">Boost Terms of Service</a>
-      <a href="#">View Past Events</a>
     </div>
   </div>
   <script>window.PROJECT = {{ getButtonUrl: "{p['getButtonUrl']}" }};</script>
