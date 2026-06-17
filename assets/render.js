@@ -1,9 +1,8 @@
 function getParam(name, fallback = "") {
-  const params = new URLSearchParams(window.location.search);
-  return params.get(name) || fallback;
+  return new URLSearchParams(window.location.search).get(name) || fallback;
 }
 
-function withFallback(preferred, aliases, fallback = "-") {
+function withFallback(preferred, aliases, fallback) {
   if (preferred) return preferred;
   for (const alias of aliases) {
     const value = getParam(alias);
@@ -17,12 +16,12 @@ function setText(selector, value) {
   if (node) node.textContent = value;
 }
 
-const end = withFallback(getParam("end"), ["endDate"]);
-const total = withFallback(getParam("total"), ["totalRewards"]);
-const participants = withFallback(getParam("participants"), ["totalParticipants"]);
-const my = withFallback(getParam("my"), ["myRewards"]);
+const end = withFallback(getParam("end"), ["endDate"], null);
+const total = withFallback(getParam("total"), ["totalRewards"], null);
+const participants = withFallback(getParam("participants"), ["totalParticipants"], null);
+const my = withFallback(getParam("my"), ["myRewards"], null);
 
-setText("[data-value='end']", end);
-setText("[data-value='total']", total);
-setText("[data-value='participants']", participants);
-setText("[data-value='my']", my);
+if (end) setText("[data-value='end']", end);
+if (total) setText("[data-value='total']", total);
+if (participants) setText("[data-value='participants']", participants);
+if (my) setText("[data-value='my']", my);
