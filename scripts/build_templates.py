@@ -169,7 +169,7 @@ def render_page(p, header: str, sidebar: str) -> str:
   <div class="page-shell">
     <div class="boost-hero">
       <h1>Boost</h1>
-      <p>Discover crypto projects and earn rewards. Boost with confidence on a platform built for speed, security, and compliance.</p>
+      <p>Discover crypto projects and earn rewards. Boost with confidence, knowing you'll always get back the crypto you put in. Explore these limited-time events and add crypto to get started.</p>
     </div>
     <div class="events-row">
       <h2>Events</h2>
