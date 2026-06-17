@@ -1,0 +1,302 @@
+@font-face {
+  font-family: BinancePlex;
+  src: url("https://bin.bnbstatic.com/static/fonts/bp/BinancePlex-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: BinancePlex;
+  src: url("https://bin.bnbstatic.com/static/fonts/bp/BinancePlex-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: BinancePlex, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.16px;
+  color: #1e2329;
+  background: #fff;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.tm-binance-hide-login { display: none !important; }
+
+.site-header-wrap {
+  display: flex;
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1001;
+  flex-direction: column;
+  width: 100%;
+  border-bottom: 1px solid #eaecef;
+  background: #fff;
+}
+
+.site-header {
+  height: 64px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.site-header nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  min-width: 0;
+}
+
+.site-header nav > ul:first-child {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-header nav > ul:first-child a,
+.site-header nav > ul:first-child .nav-item {
+  color: #707a8a;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.site-header nav > ul:last-child {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.btn-deposit {
+  background: #f0b90b;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tm-binance-header-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: 12px;
+  vertical-align: middle;
+}
+
+.tm-binance-header-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #1e2329;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.page-shell {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+
+.boost-hero h1 {
+  margin: 0 0 12px;
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.boost-hero p {
+  margin: 0 0 28px;
+  color: #707a8a;
+  max-width: 720px;
+  line-height: 1.6;
+}
+
+.events-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.events-row h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.btn-outline {
+  background: #fff;
+  border: 1px solid #eaecef;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.boost-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.boost-main {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.boost-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 0 0 320px;
+  min-width: 0;
+}
+
+.sidebar-card {
+  border: 1px solid #eaecef;
+  border-radius: 16px;
+  background: #fff;
+  padding: 24px;
+}
+
+.sidebar-card.referral { text-align: center; }
+
+.sidebar-card h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.sidebar-card.faq { position: relative; overflow: hidden; }
+
+.sidebar-card.faq .faq-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #707a8a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+.sidebar-card.faq h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.sidebar-card.faq p {
+  margin: 0 0 16px;
+  color: #707a8a;
+  line-height: 1.5;
+}
+
+.sidebar-card.faq .btn-learn {
+  background: #fff;
+  border: 1px solid #eaecef;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.sidebar-card.faq img.faq-deco {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 72px;
+  opacity: 0.9;
+}
+
+.tm-boost-referral-email {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  margin: 12px 0 8px;
+  border: 1px solid #eaecef;
+  border-radius: 12px;
+  font-size: 14px;
+  display: block;
+}
+
+.btn-invite {
+  width: 100%;
+  background: #f0b90b;
+  color: #000;
+  border: none;
+  border-radius: 24px;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tm-boost-referral-disclaimer {
+  margin-top: 12px;
+  padding: 0 2px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #707a8a;
+  text-align: left;
+}
+
+.tm-boost-referral-msg {
+  display: none;
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #e8faf0;
+  color: #0ecb81;
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.boost-project-card-get-btn {
+  color: #000 !important;
+}
+
+.boost-footer-links {
+  margin-top: 24px;
+  display: flex;
+  gap: 24px;
+}
+
+.boost-footer-links a {
+  color: #f0b90b;
+  font-size: 14px;
+}
+
+.boost-project-card table th,
+.boost-project-card table td {
+  border: none;
+}
+
+@media (max-width: 960px) {
+  .boost-layout { flex-direction: column; }
+  .boost-sidebar { flex: 1 1 auto; width: 100%; }
+  .site-header nav > ul:first-child { display: none; }
+}
