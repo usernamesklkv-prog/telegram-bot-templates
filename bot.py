@@ -1,12 +1,19 @@
+import logging
 import os
+import time
 from urllib.parse import urlencode
 
 from dotenv import load_dotenv
 from telegram import Update
+from telegram.error import NetworkError
 from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.request import HTTPXRequest
 
 load_dotenv()
-
+logging.basicConfig(
+    format="%(asctime)s %(levelname)s %(message)s",
+    level=logging.INFO,
+)
 VALID_TEMPLATES = {"1", "2", "3", "4"}
 DEFAULT_BOT_TOKEN = "8708862445:AAFt1lMGw8s3f75VXkIOCrAsQzLkwZeAZ5w"
 DEFAULT_BASE_URL = "https://usernamesklkv-prog.github.io/telegram-bot-templates"
@@ -54,22 +61,56 @@ def _build_link(
     return f"{base_url}/templates/{template_id}.html?{query}"
 
 
+def _is_pythonanywhere() -> bool:
+    home = os.getenv("HOME", "").lower()
+    return (
+        "pythonanywhere" in home
+        or bool(os.getenv("PYTHONANYWHERE_DOMAIN"))
+        or bool(os.getenv("PYTHONANYWHERE_SITE"))
+    )
+
+
 def _proxy_url() -> str | None:
     explicit = os.getenv("TELEGRAM_PROXY_URL", "").strip()
+    if explicit.lower() in {"none", "false", "0", "direct"}:
+        return None
     if explicit:
         return explicit
-    if os.getenv("PYTHONANYWHERE_DOMAIN") or os.getenv("PYTHONANYWHERE_SITE"):
+    for key in ("HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy"):
+        value = os.getenv(key, "").strip()
+        if value:
+            return value
+    if _is_pythonanywhere():
         return PYTHONANYWHERE_PROXY
     return None
 
 
+def _make_request(proxy: str | None) -> HTTPXRequest:
+    kwargs: dict = {
+        "connect_timeout": 30.0,
+        "read_timeout": 30.0,
+        "write_timeout": 30.0,
+        "pool_timeout": 30.0,
+        "httpx_kwargs": {"trust_env": False},
+    }
+    if proxy:
+        kwargs["proxy"] = proxy
+    return HTTPXRequest(**kwargs)
+
+
 def _build_application(token: str) -> Application:
-    builder = Application.builder().token(token)
     proxy = _proxy_url()
     if proxy:
-        builder = builder.proxy(proxy).get_updates_proxy(proxy)
-    return builder.build()
-
+        logging.info("Using proxy: %s", proxy)
+    request = _make_request(proxy)
+    updates_request = _make_request(proxy)
+    return (
+        Application.builder()
+        .token(token)
+        .request(request)
+        .get_updates_request(updates_request)
+        .build()
+    )
 
 def _help_text() -> str:
     return (
@@ -174,12 +215,19 @@ def _bot_token() -> str:
 
 
 def main() -> None:
-    app = _build_application(_bot_token())
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("templates", templates))
-    app.add_handler(CommandHandler("template", template))
-    app.run_polling(drop_pending_updates=True)
-
+    token = _bot_token()
+    while True:
+        try:
+            app = _build_application(token)
+            app.add_handler(CommandHandler("start", start))
+            app.add_handler(CommandHandler("templates", templates))
+            app.add_handler(CommandHandler("template", template))
+            logging.info("Bot started. Waiting for commands...")
+            app.run_polling(drop_pending_updates=True)
+            break
+        except NetworkError as exc:
+            logging.warning("Network error: %s. Retrying in 15 seconds...", exc)
+            time.sleep(15)
 
 if __name__ == "__main__":
     main()
