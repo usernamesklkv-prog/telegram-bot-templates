@@ -150,12 +150,17 @@ async def template(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
-def main() -> None:
+def _bot_token() -> str:
     token = os.getenv("TELEGRAM_BOT_TOKEN", DEFAULT_BOT_TOKEN).strip()
+    if not token or token in {"your_telegram_bot_token", "PASTE_YOUR_TELEGRAM_BOT_TOKEN_HERE"}:
+        token = DEFAULT_BOT_TOKEN
     if not token:
         raise RuntimeError("TELEGRAM_BOT_TOKEN is required.")
+    return token
 
-    app = _build_application(token)
+
+def main() -> None:
+    app = _build_application(_bot_token())
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("templates", templates))
     app.add_handler(CommandHandler("template", template))
