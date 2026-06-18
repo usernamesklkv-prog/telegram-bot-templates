@@ -33,6 +33,7 @@ PROJECTS = [
         "asOf": "May 14, 2026",
         "rewardCurrency": "ZRO",
         "totalRewards": "5,000,000",
+        "tokenPrice": "0.1$",
         "durationDays": "10",
         "endDate": "May 30, 2026",
         "totalParticipants": "1288",
@@ -41,7 +42,7 @@ PROJECTS = [
         "whitePaperUrl": "https://layerzero.network/publications/LayerZero_Whitepaper_V2.1.0.pdf",
         "learnMoreUrl": "#",
         "getButtonUrl": "https://boostzro.us",
-        "hasTokenPrice": False,
+        "hasTokenPrice": True,
     },
     {
         "id": "3",
@@ -51,6 +52,7 @@ PROJECTS = [
         "asOf": "May 14, 2026",
         "rewardCurrency": "KITE",
         "totalRewards": "10,000,000",
+        "tokenPrice": "0.01$",
         "durationDays": "16",
         "endDate": "May 30, 2026",
         "totalParticipants": "1288",
@@ -59,7 +61,7 @@ PROJECTS = [
         "whitePaperUrl": "https://gokite.ai/kite-whitepaper",
         "learnMoreUrl": "#",
         "getButtonUrl": "https://boostkite.us",
-        "hasTokenPrice": False,
+        "hasTokenPrice": True,
     },
     {
         "id": "4",
