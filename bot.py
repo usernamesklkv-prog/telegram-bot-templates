@@ -9,19 +9,13 @@ load_dotenv()
 
 VALID_TEMPLATES = {"1", "2", "3", "4"}
 DEFAULT_BASE_URL = "https://usernamesklkv-prog.github.io/telegram-bot-templates"
+PYTHONANYWHERE_PROXY = "http://proxy.server:3128"
 TEMPLATE_DESCRIPTIONS = {
     "1": "Billions Network (BILL)",
     "2": "LayerZero (ZRO)",
     "3": "Kite AI (KITE)",
     "4": "Aave (AAVE)",
 }
-
-
-def _base_url() -> str:
-    base = os.getenv("TEMPLATE_BASE_URL", DEFAULT_BASE_URL).strip().rstrip("/")
-    if not base:
-        raise RuntimeError("TEMPLATE_BASE_URL is required in environment variables.")
-    return base
 
 
 def _is_number_like(value: str) -> bool:
@@ -35,25 +29,61 @@ def _is_number_like(value: str) -> bool:
     return normalized.replace(".", "", 1).isdigit()
 
 
-def _build_link(template_id: str, end: str, total: str, participants: str, my: str) -> str:
-    query = urlencode(
-        {
-            "end": end,
-            "total": total,
-            "participants": participants,
-            "my": my,
-        }
-    )
-    return f"{_base_url()}/templates/{template_id}.html?{query}"
+def _build_link(
+    template_id: str,
+    end: str,
+    total: str,
+    participants: str,
+    my: str,
+    duration: str | None = None,
+    asof: str | None = None,
+) -> str:
+    params = {
+        "end": end,
+        "total": total,
+        "participants": participants,
+        "my": my,
+    }
+    if duration:
+        params["duration"] = duration
+    if asof:
+        params["asof"] = asof
+    query = urlencode(params)
+    base_url = os.getenv("TEMPLATE_BASE_URL", DEFAULT_BASE_URL).strip().rstrip("/")
+    return f"{base_url}/templates/{template_id}.html?{query}"
+
+
+def _proxy_url() -> str | None:
+    explicit = os.getenv("TELEGRAM_PROXY_URL", "").strip()
+    if explicit:
+        return explicit
+    if os.getenv("PYTHONANYWHERE_DOMAIN") or os.getenv("PYTHONANYWHERE_SITE"):
+        return PYTHONANYWHERE_PROXY
+    return None
+
+
+def _build_application(token: str) -> Application:
+    builder = Application.builder().token(token)
+    proxy = _proxy_url()
+    if proxy:
+        builder = builder.proxy(proxy).get_updates_proxy(proxy)
+    return builder.build()
 
 
 def _help_text() -> str:
     return (
         "Одна команда = одна ссылка:\n\n"
-        "/template <1-4> <end_date> <total_rewards> <participants> <my_rewards>\n\n"
-        "Пример:\n"
-        "/template 1 2026-05-23 50000 1125 13\n\n"
-        "Подсказка: если в значениях есть пробелы, используй _ вместо пробела."
+        "/template <1-4> <end_date> <total_rewards> <participants> <my_rewards> "
+        "[duration] [as_of_date]\n\n"
+        "Примеры:\n"
+        "/template 1 2026-05-23 50,000 1125 13\n"
+        "/template 1 2026-05-23 50,000 1125 13 10\n"
+        "/template 1 2026-05-23 50,000 1125 13 10 May_15,_2026\n\n"
+        "Подсказки:\n"
+        "- duration — длительность в днях (Event Duration), необязательно.\n"
+        "- as_of_date — дата в тексте «as of …», вместо пробелов ставь _ "
+        "(May_15,_2026), необязательно.\n"
+        "- В Total Rewards можно писать запятые: 50,000."
     )
 
 
@@ -67,19 +97,25 @@ async def templates(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         lines.append(f"{template_id} - {title}")
     lines.append("")
     lines.append("Использование:")
-    lines.append("/template <1-4> <end_date> <total_rewards> <participants> <my_rewards>")
+    lines.append(
+        "/template <1-4> <end_date> <total_rewards> <participants> <my_rewards> "
+        "[duration] [as_of_date]"
+    )
     await update.message.reply_text("\n".join(lines))
 
 
 async def template(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if len(context.args) != 5:
+    if not 5 <= len(context.args) <= 7:
         await update.message.reply_text(
-            "Ошибка: нужно ровно 5 аргументов.\n\n"
+            "Ошибка: нужно от 5 до 7 аргументов.\n\n"
             f"{_help_text()}"
         )
         return
 
-    template_id, end, total, participants, my = [arg.strip() for arg in context.args]
+    args = [arg.strip() for arg in context.args]
+    template_id, end, total, participants, my = args[:5]
+    duration = args[5] if len(args) >= 6 else None
+    asof = args[6].replace("_", " ") if len(args) >= 7 else None
 
     if template_id not in VALID_TEMPLATES:
         await update.message.reply_text("Ошибка: номер шаблона должен быть от 1 до 4.")
@@ -100,7 +136,13 @@ async def template(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             )
             return
 
-    link = _build_link(template_id, end, total, participants, my)
+    if duration is not None and not _is_number_like(duration):
+        await update.message.reply_text(
+            "Ошибка: Event Duration (duration) должен быть числом дней. Пример: 10"
+        )
+        return
+
+    link = _build_link(template_id, end, total, participants, my, duration, asof)
     await update.message.reply_text(
         "Готово. Открой ссылку и сделай скриншот:\n\n"
         f"{link}"
@@ -108,11 +150,11 @@ async def template(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 def main() -> None:
-    token = os.getenv("8708862445:AAFt1lMGw8s3f75VXkIOCrAsQzLkwZeAZ5w", "").strip()
+    token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
     if not token:
         raise RuntimeError("TELEGRAM_BOT_TOKEN is required in environment variables.")
 
-    app = Application.builder().token(token).build()
+    app = _build_application(token)
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("templates", templates))
     app.add_handler(CommandHandler("template", template))
