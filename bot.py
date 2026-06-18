@@ -8,6 +8,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 load_dotenv()
 
 VALID_TEMPLATES = {"1", "2", "3", "4"}
+DEFAULT_BOT_TOKEN = "8708862445:AAFt1lMGw8s3f75VXkIOCrAsQzLkwZeAZ5w"
 DEFAULT_BASE_URL = "https://usernamesklkv-prog.github.io/telegram-bot-templates"
 PYTHONANYWHERE_PROXY = "http://proxy.server:3128"
 TEMPLATE_DESCRIPTIONS = {
@@ -150,9 +151,9 @@ async def template(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 def main() -> None:
-    token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+    token = os.getenv("TELEGRAM_BOT_TOKEN", DEFAULT_BOT_TOKEN).strip()
     if not token:
-        raise RuntimeError("TELEGRAM_BOT_TOKEN is required in environment variables.")
+        raise RuntimeError("TELEGRAM_BOT_TOKEN is required.")
 
     app = _build_application(token)
     app.add_handler(CommandHandler("start", start))
