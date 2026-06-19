@@ -1,7 +1,10 @@
 import asyncio
 import logging
 import os
+import time
 from urllib.parse import urlencode
+
+import httpx
 
 from dotenv import load_dotenv
 from telegram import Update
@@ -248,32 +251,34 @@ def _bot_token() -> str:
     return token
 
 
-async def _wait_for_telegram(token: str) -> None:
+def _wait_for_telegram(token: str) -> None:
+    proxy = _proxy_url()
     delay = 15
+    url = f"https://api.telegram.org/bot{token}/getMe"
+    client_kwargs: dict = {"timeout": 30.0, "trust_env": False}
+    if proxy:
+        client_kwargs["proxy"] = proxy
+
     while True:
-        app = _build_application(token)
         try:
-            await app.initialize()
-            await app.shutdown()
+            with httpx.Client(**client_kwargs) as client:
+                response = client.get(url)
+                response.raise_for_status()
             logging.info("Telegram API reachable via proxy.")
             return
-        except NetworkError as exc:
+        except httpx.HTTPError as exc:
             logging.warning(
                 "Telegram API unavailable (%s). Retrying in %ss...",
                 exc,
                 delay,
             )
-            try:
-                await app.shutdown()
-            except Exception:
-                pass
-            await asyncio.sleep(delay)
+            time.sleep(delay)
             delay = min(delay + 5, 60)
 
 
 def main() -> None:
     token = _bot_token()
-    asyncio.run(_wait_for_telegram(token))
+    _wait_for_telegram(token)
 
     app = _build_application(token)
     app.add_error_handler(_on_error)
