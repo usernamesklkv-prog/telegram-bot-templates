@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import time
@@ -5,7 +6,7 @@ from urllib.parse import urlencode
 
 from dotenv import load_dotenv
 from telegram import Update
-from telegram.error import NetworkError
+from telegram.error import NetworkError, RetryAfter, TimedOut
 from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.request import HTTPXRequest
 
@@ -112,6 +113,36 @@ def _build_application(token: str) -> Application:
         .build()
     )
 
+async def _reply_with_retry(update: Update, text: str, max_attempts: int = 5) -> None:
+    if not update.message:
+        return
+
+    delay = 2.0
+    for attempt in range(1, max_attempts + 1):
+        try:
+            await update.message.reply_text(text)
+            return
+        except RetryAfter as exc:
+            await asyncio.sleep(float(exc.retry_after) + 1.0)
+        except (NetworkError, TimedOut) as exc:
+            if attempt >= max_attempts:
+                logging.error("Failed to send message after %s attempts: %s", max_attempts, exc)
+                return
+            logging.warning(
+                "Send failed (attempt %s/%s): %s. Retrying in %.0fs...",
+                attempt,
+                max_attempts,
+                exc,
+                delay,
+            )
+            await asyncio.sleep(delay)
+            delay = min(delay * 2, 15.0)
+
+
+async def _on_error(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logging.exception("Unhandled bot error", exc_info=context.error)
+
+
 def _help_text() -> str:
     return (
         "Одна команда = одна ссылка\n\n"
@@ -144,7 +175,7 @@ def _help_text() -> str:
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(_help_text())
+    await _reply_with_retry(update, _help_text())
 
 
 async def templates(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -157,14 +188,15 @@ async def templates(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "/template <1-4> <end_date> <total_rewards> <participants> <my_rewards> "
         "[duration] [as_of_date]"
     )
-    await update.message.reply_text("\n".join(lines))
+    await _reply_with_retry(update, "\n".join(lines))
 
 
 async def template(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not 5 <= len(context.args) <= 7:
-        await update.message.reply_text(
+        await _reply_with_retry(
+            update,
             "Ошибка: нужно от 5 до 7 аргументов.\n\n"
-            f"{_help_text()}"
+            f"{_help_text()}",
         )
         return
 
@@ -174,11 +206,11 @@ async def template(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     asof = args[6].replace("_", " ") if len(args) >= 7 else None
 
     if template_id not in VALID_TEMPLATES:
-        await update.message.reply_text("Ошибка: номер шаблона должен быть от 1 до 4.")
+        await _reply_with_retry(update, "Ошибка: номер шаблона должен быть от 1 до 4.")
         return
 
     if len(end) < 6:
-        await update.message.reply_text("Ошибка: End Date слишком короткий. Пример: 2026-05-23")
+        await _reply_with_retry(update, "Ошибка: End Date слишком короткий. Пример: 2026-05-23")
         return
 
     for label, value in (
@@ -187,21 +219,24 @@ async def template(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         ("My Rewards", my),
     ):
         if not _is_number_like(value):
-            await update.message.reply_text(
-                f"Ошибка: {label} должен быть числом (допустимы запятые и точка)."
+            await _reply_with_retry(
+                update,
+                f"Ошибка: {label} должен быть числом (допустимы запятые и точка).",
             )
             return
 
     if duration is not None and not _is_number_like(duration):
-        await update.message.reply_text(
-            "Ошибка: Event Duration (duration) должен быть числом дней. Пример: 10"
+        await _reply_with_retry(
+            update,
+            "Ошибка: Event Duration (duration) должен быть числом дней. Пример: 10",
         )
         return
 
     link = _build_link(template_id, end, total, participants, my, duration, asof)
-    await update.message.reply_text(
+    await _reply_with_retry(
+        update,
         "Готово. Открой ссылку и сделай скриншот:\n\n"
-        f"{link}"
+        f"{link}",
     )
 
 
@@ -219,6 +254,7 @@ def main() -> None:
     while True:
         try:
             app = _build_application(token)
+            app.add_error_handler(_on_error)
             app.add_handler(CommandHandler("start", start))
             app.add_handler(CommandHandler("templates", templates))
             app.add_handler(CommandHandler("template", template))
