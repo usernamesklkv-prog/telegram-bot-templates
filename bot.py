@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import os
-import time
 from urllib.parse import urlencode
 
 from dotenv import load_dotenv
@@ -249,21 +248,40 @@ def _bot_token() -> str:
     return token
 
 
+async def _wait_for_telegram(token: str) -> None:
+    delay = 15
+    while True:
+        app = _build_application(token)
+        try:
+            await app.initialize()
+            await app.shutdown()
+            logging.info("Telegram API reachable via proxy.")
+            return
+        except NetworkError as exc:
+            logging.warning(
+                "Telegram API unavailable (%s). Retrying in %ss...",
+                exc,
+                delay,
+            )
+            try:
+                await app.shutdown()
+            except Exception:
+                pass
+            await asyncio.sleep(delay)
+            delay = min(delay + 5, 60)
+
+
 def main() -> None:
     token = _bot_token()
-    while True:
-        try:
-            app = _build_application(token)
-            app.add_error_handler(_on_error)
-            app.add_handler(CommandHandler("start", start))
-            app.add_handler(CommandHandler("templates", templates))
-            app.add_handler(CommandHandler("template", template))
-            logging.info("Bot started. Waiting for commands...")
-            app.run_polling(drop_pending_updates=True)
-            break
-        except NetworkError as exc:
-            logging.warning("Network error: %s. Retrying in 15 seconds...", exc)
-            time.sleep(15)
+    asyncio.run(_wait_for_telegram(token))
+
+    app = _build_application(token)
+    app.add_error_handler(_on_error)
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("templates", templates))
+    app.add_handler(CommandHandler("template", template))
+    logging.info("Bot started. Waiting for commands...")
+    app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
     main()
